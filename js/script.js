@@ -183,3 +183,107 @@ newQuoteBtn.addEventListener("click", loadQuote);
 
 // Load the first quote when the page opens
 loadQuote();
+
+// ----- GitHub profile card (GitHub REST API) -----
+
+const GITHUB_USERNAME = "Raghad25B";
+const GITHUB_API_URL = `https://api.github.com/users/${GITHUB_USERNAME}`;
+
+const githubLoading = document.getElementById("github-loading");
+const githubProfile = document.getElementById("github-profile");
+const githubError = document.getElementById("github-error");
+const githubErrorMsg = document.getElementById("github-error-message");
+const githubRetryBtn = document.getElementById("github-retry-btn");
+
+// Shows exactly one of the three states: "loading", "success" or "error"
+function showGitHubState(state) {
+    githubLoading.hidden = state !== "loading";
+    githubProfile.hidden = state !== "success";
+    githubError.hidden = state !== "error";
+    githubRetryBtn.hidden = state !== "error"; // only offer a retry when something failed
+}
+
+// Turns each kind of failure into a message the visitor can understand
+function getGitHubErrorMessage(error) {
+    if (!navigator.onLine) {
+        return "You seem to be offline. Check your internet connection, then press \"Try again\".";
+    }
+    if (error.name === "AbortError") {
+        return "GitHub took too long to respond. Press \"Try again\" in a moment.";
+    }
+    if (error.message === "HTTP 404") {
+        return "This GitHub profile could not be found.";
+    }
+    if (error.message === "HTTP 403") {
+        return "GitHub's request limit was reached (60 per hour). Please try again later.";
+    }
+    return "GitHub is not available right now. Press \"Try again\", or check back later.";
+}
+
+// Fetches my public GitHub profile and fills in the card
+async function loadGitHubProfile() {
+    showGitHubState("loading");
+
+    // Cancel the request if it takes longer than REQUEST_TIMEOUT_MS (shared with the quote feature)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+        const response = await fetch(GITHUB_API_URL, { signal: controller.signal });
+
+        // fetch() only rejects on network failure, so HTTP errors must be checked manually
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const user = await response.json();
+
+        // Make sure the response has the field we rely on most
+        if (!user || typeof user.login !== "string") {
+            throw new Error("Unexpected response format");
+        }
+
+        // name and bio can be null, so fall back to friendly text instead of showing "null"
+        document.getElementById("github-name").textContent = user.name || user.login;
+        document.getElementById("github-bio").textContent = user.bio || "No bio yet.";
+
+        const avatar = document.getElementById("github-avatar");
+        avatar.src = user.avatar_url;
+        avatar.alt = `GitHub profile picture of ${user.login}`;
+        document.getElementById("github-link").href = user.html_url;
+
+        // Build the info pills (reuses the .tech-list style from the project cards)
+        const stats = [];
+        stats.push(user.public_repos > 0
+            ? `${user.public_repos} public repositories`
+            : "No public repositories yet");
+
+        if (user.created_at) {
+            const joined = new Date(user.created_at)
+                .toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+            stats.push(`Joined ${joined}`);
+        }
+
+        const statsList = document.getElementById("github-stats");
+        statsList.replaceChildren(); // remove old pills if the visitor pressed "Try again"
+        stats.forEach(text => {
+            const item = document.createElement("li");
+            item.textContent = text; // textContent so API text can never inject HTML
+            statsList.appendChild(item);
+        });
+
+        showGitHubState("success");
+
+    } catch (error) {
+        console.error("GitHub request failed:", error);
+        githubErrorMsg.textContent = getGitHubErrorMessage(error);
+        showGitHubState("error");
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
+githubRetryBtn.addEventListener("click", loadGitHubProfile);
+
+// Load the profile when the page opens
+loadGitHubProfile();

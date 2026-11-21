@@ -14,6 +14,7 @@
 
         <nav>
             <a href="#about">About Me</a>
+            <a href="#github">GitHub</a>
             <a href="#projects">Projects</a> 
             <a href="#quote">Quote</a>
             <a href="#contact">Contact</a>
@@ -31,12 +32,49 @@
                 I enjoy creating innovative solutions and learning new technologies to enhance my skills.
             </p>
             </section>
+<section class="github-section" id="github">
+    <h2>My GitHub</h2>
+    <p class="github-intro">Live data from my GitHub profile, loaded with the GitHub API.</p>
 
+    <div class="github-card">
+        <!-- aria-live makes screen readers announce the result -->
+        <div aria-live="polite">
+
+            <!-- 1. Loading state -->
+            <div class="github-loading" id="github-loading" hidden>
+                <span class="spinner" aria-hidden="true"></span>
+                <span>Loading GitHub profile…</span>
+            </div>
+
+            <!-- 2. Success state -->
+            <div class="github-profile" id="github-profile" hidden>
+                <img id="github-avatar" alt="" width="88" height="88">
+                <div>
+                    <h3 id="github-name"></h3>
+                    <p class="github-bio" id="github-bio"></p>
+                    <ul class="tech-list" id="github-stats"></ul>
+                    <a class="btn btn-primary" id="github-link" href="https://github.com/Raghad25B" target="_blank" rel="noopener">View profile on GitHub</a>
+                </div>
+            </div>
+
+            <!-- 3. Error state -->
+            <div class="github-error" id="github-error" role="alert" hidden>
+                <strong>Couldn't load my GitHub profile.</strong>
+                <p id="github-error-message"></p>
+            </div>
+
+        </div>
+
+        <button type="button" class="btn btn-secondary" id="github-retry-btn" hidden>Try again</button>
+    </div>
+</section>
                         <section id="projects">
                 <div class="projects-header">
                     <h2>My Projects</h2>
                     <button type="button" class="btn btn-secondary" id="toggle-all-btn">Expand all</button>
                 </div>
+
+                
 
                 <div class="project-container">
 

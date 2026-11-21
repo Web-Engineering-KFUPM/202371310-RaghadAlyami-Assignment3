@@ -254,11 +254,13 @@ h2{
 }
 
 /* ---------- Quote of the Moment (public API) ---------- */
-.quote-section {
+.quote-section,
+.github-section {
     max-width: 760px;
 }
 
-.quote-intro {
+.quote-intro,
+.github-intro {
     margin: 0 0 20px;
     color: var(--muted);
 }
@@ -330,7 +332,8 @@ h2{
 }
 
 /* Loading state */
-.quote-loading {
+.quote-loading,
+.github-loading {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -353,7 +356,8 @@ h2{
 }
 
 /* Error state */
-.quote-error {
+.quote-error,
+.github-error {
     background-color: var(--error-soft);
     color: var(--error);
     border-left: 4px solid var(--error);
@@ -361,12 +365,14 @@ h2{
     border-radius: 0 6px 6px 0;
 }
 
-.quote-error strong {
+.quote-error strong,
+.github-error strong {
     display: block;
     margin-bottom: 2px;
 }
 
-.quote-error p {
+.quote-error p,
+.github-error p {
     margin: 0;
     color: var(--text);
 }
@@ -408,6 +414,48 @@ h2{
     color: var(--accent);
 }
 
+/* ---------- GitHub profile card (GitHub API) ---------- */
+.github-card {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    min-height: 150px; /* keeps the card from jumping between states */
+}
+
+.github-profile {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap; /* stacks the photo above the text on small screens */
+    gap: 20px;
+}
+
+.github-profile img {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    border: 3px solid var(--accent-soft);
+}
+
+.github-profile h3 {
+    margin: 0 0 4px;
+    color: var(--accent);
+}
+
+.github-bio {
+    margin: 0 0 10px;
+    color: var(--muted);
+}
+
+.github-profile .btn {
+    display: inline-block;
+    margin-top: 14px;
+    text-decoration: none;
+}
+
+#github-retry-btn {
+    margin-top: 16px;
+}
 /* Use the [hidden] attribute to show/hide states */
 [hidden] {
     display: none !important;
