@@ -21,21 +21,46 @@ showGreeting();
 let contactForm = document.getElementById("contact-form");
 let feedback = document.getElementById("form-feedback");
 
+// Simple email pattern: text@text.text with no spaces
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 function checkMessage(event){
     event.preventDefault();
 
     let name = document.getElementById("name").value.trim();
+    let email = document.getElementById("email").value.trim();
     let message = document.getElementById("message").value.trim();
 
-    if (name === ""|| message === ""){
-        feedback.textContent=
-        "Please enter a name and message, not just spaces.";
+    // Step 1: no field can be empty or only spaces
+    if (name === "" || email === "" || message === ""){
+        feedback.textContent =
+        "Please fill in your name, email and message, not just spaces.";
         return;
     }
 
-    feedback.textContent=
-    "Thank you, " + name +
-    "! Your entries are valid.";
+       if (name.length < 2) {
+        feedback.textContent = "Name must contain at least 2 characters.";
+        return;
+    }
+
+    // Step 2: the email must look like a real address
+    if (!EMAIL_PATTERN.test(email)){
+        feedback.textContent =
+        "Please enter a valid email address, like name@example.com.";
+        return;
+    }
+
+    // Step 3: the message must be at least 10 characters
+    if (message.length < 10){
+        feedback.textContent =
+        "Your message is a bit short. Please write at least 10 characters.";
+        return;
+    }
+
+    // All checks passed
+    feedback.textContent =
+    "Thank you, " + name + "! Your entries are valid.";
+    contactForm.reset(); // clear the form after a successful submit
 }
 
 contactForm.addEventListener("submit",checkMessage);
