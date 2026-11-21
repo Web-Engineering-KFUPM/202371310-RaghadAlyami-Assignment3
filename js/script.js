@@ -273,7 +273,8 @@ async function loadGitHubProfile() {
         document.getElementById("github-bio").textContent = user.bio || "No bio yet.";
 
         const avatar = document.getElementById("github-avatar");
-        avatar.src = user.avatar_url;
+        // GitHub can resize avatars: s=176 is 2× the 88px display size (sharp on high-res screens)
+        avatar.src = user.avatar_url + "&s=176";
         avatar.alt = `GitHub profile picture of ${user.login}`;
         document.getElementById("github-link").href = user.html_url;
 

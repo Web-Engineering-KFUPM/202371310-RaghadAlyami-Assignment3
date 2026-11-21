@@ -1,9 +1,10 @@
 :root {
-    --header-bg: #eaaeb9;
+    --accent-strong: #c2185b; /* darker pink: white text on it passes contrast */
+    --header-bg: #b5475f;
     --card: white;
     --muted: #57534e;
     --border: #d7ccc8;
-    --accent: #f96983;
+    --accent: #c2185b;
     --accent-soft: #f1ebe7;
     --radius: 10px;
     --speed: 0.35s;
@@ -65,12 +66,12 @@ section {
 }
 
 h2{
-    color: #ff728c;
+    color: var(--accent); 
     font-size: 28px;
 }
 
 #greeting {
-    color: #fd5070;
+    color: var(--accent); 
     font-weight: bold;
 }
 
@@ -387,14 +388,14 @@ h2{
 }
 
 .btn-primary {
-    background-color: var(--accent);
+    background-color: var(--accent-strong);
     color: white;
     border: none;
     transition: background-color 0.2s ease, transform 0.1s ease, opacity 0.2s ease;
 }
 
 .btn-primary:hover {
-    background-color: #e56984;
+    background-color: #ad1457;
 }
 
 .btn-primary:active {
@@ -552,6 +553,7 @@ footer {
    Most colours come from the variables in :root, so changing the
    variables here recolours the cards, quote box, GitHub card, etc. */
 [data-theme="dark"] {
+    --accent: #f96983;
     --card: #2a2326;
     --muted: #cfc4c0;
     --border: #4d4144;
