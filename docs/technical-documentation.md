@@ -1,296 +1,296 @@
-# Technical Documentation – Assignment 2
-
+# Technical Documentation – Assignment 3
+ 
 **Student:** Raghad Alyami (202371310)
 **Course:** SWE363 – Web Development
-**Assignment:** Assignment 2 – Interactive Features
-
+**Assignment:** Assignment 3 – Advanced Functionality
+ 
 ## 1. Project Overview
-
-This project is an improved version of my personal portfolio website from Assignment 1. The main objective is to add interactive features using JavaScript and improve the overall user experience.
-
-In Assignment 1, I created the basic portfolio structure with an About Me section, project cards, a dynamic greeting, and a contact form.
-
-For Assignment 2, I added:
-
-1. **Expandable project cards** – dynamic content that changes when the visitor clicks.
-2. **Quote of the Moment** – data retrieved from a public API, with loading and error states.
-
-Both features also add animations and transitions. The website is a static single page built with HTML, CSS, and vanilla JavaScript. It needs no server, database, build step, or frontend framework.
-
+ 
+This project is an improved version of my personal portfolio website from Assignment 2. The main objective is to add advanced features: integrating an external API, implementing more complex logic, managing application state, and optimizing performance.
+ 
+In Assignment 2, I added expandable project cards and a Quote of the Moment section that loads data from a public API.
+ 
+For Assignment 3, I added:
+ 
+1. **GitHub profile card** – live data from the GitHub REST API, with loading, error, and missing-data handling.
+2. **Step-by-step contact form validation** – several rules checked in order, each with its own message.
+3. **Light / dark theme** – state saved in `localStorage` and restored when the page reloads.
+4. **Performance and accessibility optimization** – tested with Google Lighthouse, from 87 / 96 / 96 / 91 to 100 / 100 / 100 / 100.
+The website is still a static single page built with HTML, CSS, and vanilla JavaScript. It needs no server, database, build step, or frontend framework.
+ 
 ## 2. Technologies Used
-
+ 
 | Technology | Purpose |
 |---|---|
-| HTML5 | Structures the portfolio sections, project cards, buttons, and form |
-| CSS3 | Layout (Grid, Flexbox), custom properties, transitions, keyframe animations, responsive design |
-| JavaScript | Handles user interactions and dynamic content |
-| DOM API | Accesses and updates HTML elements |
-| Fetch API | Requests quote data from an external API |
-| DummyJSON | Provides the quotes used in the Quote of the Moment section (free, no API key) |
-
+| HTML5 | Structures the portfolio sections, GitHub card, project cards, buttons, and form |
+| CSS3 | Layout (Grid, Flexbox), custom properties for theming, transitions, animations, responsive design |
+| JavaScript | Handles user interactions, API requests, validation, and theme state |
+| DOM API | Accesses, creates, and updates HTML elements |
+| Fetch API | Requests data from the GitHub and DummyJSON APIs |
+| Web Storage API | `localStorage` remembers the visitor's theme |
+| GitHub REST API | Provides my public profile data (free, no API key) |
+| DummyJSON | Provides the quotes for Quote of the Moment (free, no API key) |
+| Google Lighthouse | Measures performance, accessibility, best practices, and SEO |
+| Squoosh | Resizes and converts images to WebP |
+ 
 ## 3. Project Structure
-
+ 
 | File | Purpose |
 |---|---|
-| `index.html` | Page structure: header with navigation, About Me, Projects, Quote of the Moment, Contact, footer |
-| `css/styles.css` | Variables, layout, card and quote styles, animations, reduced-motion rules |
-| `js/script.js` | Four parts, in order: greeting, contact form, project cards, quote API |
-| `assets/images/` | `Wasm.jpeg` (≈324 KB) and `pedestrian-light.jpeg` (≈236 KB) |
+| `index.html` | Page structure: header with navigation and theme button, About Me, GitHub, Projects, Quote of the Moment, Contact, footer. A small script in `<head>` applies the saved theme early. |
+| `css/styles.css` | Theme variables (light and dark), layout, card / quote / GitHub styles, animations, reduced-motion rules |
+| `js/script.js` | Six parts, in order: greeting, contact form validation, project cards, quote API, GitHub API, theme toggle |
+| `assets/images/` | `Wasm.webp` (≈55 KB) and `pedestrian-light.webp` (≈51 KB) |
 | `README.md` | Explains the project and how to run it |
 | `docs/ai-usage-report.md` | Documents AI assistance |
 | `docs/technical-documentation.md` | Explains the implementation and testing |
-
-
+ 
 ## 4. Website Implementation
-
-### 4.1 About Me and Dynamic Greeting
-
-The About Me section introduces my background and interests in Computer Science and software development.
-
-The greeting feature was implemented in Assignment 1 and is kept in Assignment 2. `showGreeting()` uses the `Date` object and `getHours()` to read the visitor's local time. Conditional statements select the greeting (morning before 12, afternoon before 18, evening otherwise), and it is displayed by updating the `textContent` of the element with the ID `greeting`.
-
-### 4.2 Interactive Project Cards
-
-One of the main improvements in Assignment 2 is the expandable project cards. The Projects section contains two projects:
-
-1. Wasm – Creative Services App (Figma)
-2. FPGA Pedestrian Light (Verilog, FPGA board)
-
-Each card displays an image, project title, and short summary. The tools used and the full description are placed inside a collapsible details section.
-
-- `aria-controls="details-1"` connects the button to its details container. JavaScript reads this attribute to find the right panel, so the same code works for any number of cards (each ID must be unique).
-- `aria-expanded` stores the current state and lets screen readers announce "expanded" or "collapsed".
-
-#### Expand and Collapse Behavior
-
-All opening and closing goes through one function:
-
-```js
-function setCardState(button, shouldOpen) {
-    const panel = document.getElementById(button.getAttribute("aria-controls"));
-    if (!panel) return;
-
-    button.setAttribute("aria-expanded", String(shouldOpen));
-    button.querySelector(".toggle-label").textContent = shouldOpen ? "Hide details" : "Show details";
-    panel.classList.toggle("open", shouldOpen);
-    panel.inert = !shouldOpen;
-}
-```
-
-- `classList.toggle("open", shouldOpen)` adds the `open` class when `shouldOpen` is `true` and removes it when `false`.
-- The button label switches between Show details and Hide details.
-- `panel.inert = true` makes a closed panel unreachable with the Tab key and hidden from screen readers.
-- **Event delegation:** instead of one listener per button, one `click` listener on `.project-container` handles all cards. `event.target.closest(".toggle-btn")` finds the button even if the visitor clicked the text or arrow inside it. If the click was not on a toggle button, the function returns.
-- When the page loads, every card is set to closed, which also sets `inert` correctly.
-
-
-#### Expand All / Collapse All
-
-The **Expand all** button at the top of the Projects section controls both cards at the same time. Its listener calls `setCardState()` for every card with the same value.
-
-`updateToggleAllLabel()` uses `[...buttons].every(...)` to check whether **all** cards are open. If they are, the label becomes Collapse all; otherwise it is Expand all. This also updates correctly when the visitor opens the cards one by one.
-
-#### Animation
-
-`height: auto` cannot be animated directly. Instead, the details container is a one-row grid whose row animates from `0fr` (no height) to `1fr` (full content height):
-
-```css
-.card-details {
-    display: grid;
-    grid-template-rows: 0fr;
-    opacity: 0;
-    transition: grid-template-rows var(--speed) ease, opacity var(--speed) ease;
-}
-
-.card-details.open {
-    grid-template-rows: 1fr;
-    opacity: 1;
-}
-
-.card-details-inner {
-    overflow: hidden; /* hides the content while the row is 0fr */
-}
-```
-
-- **Arrow:** a small square with two borders, rotated 45°. The selector `.toggle-btn[aria-expanded="true"] .chevron` rotates it to −135°, so the arrow flips when the card opens. The CSS reacts directly to the ARIA state.
-- **Hover:** cards rise 3px with a soft shadow (`transform` + `box-shadow` transition).
-- **Layout:** `grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))` gives two columns on a laptop and one on a phone without a media query. `align-items: start` lets an opened card grow without stretching the other card.
-- **Images:** `height: 280px; object-fit: contain` shows the full photo without cropping.
-
-These effects need no external animation library.
-
-### 4.3 Quote of the Moment
-
-This section retrieves inspirational quotes from the DummyJSON Quotes API.
-
-- Endpoint: `GET https://dummyjson.com/quotes/random`
-- Documentation: https://dummyjson.com/docs/quotes
-- Response example: `{ "id": 12, "quote": "…", "author": "…" }`
-
-A quote loads automatically when the page opens, and the **New quote** button loads another one.
-
+ 
+### 4.1 GitHub Profile Card (API Integration)
+ 
+This section shows my GitHub profile using data from the GitHub REST API.
+ 
+- Endpoint: `GET https://api.github.com/users/Raghad25B`
+- Documentation: https://docs.github.com/en/rest/users/users
+- Fields used: `login`, `name`, `bio`, `avatar_url`, `html_url`, `public_repos`, `created_at`
+- No API key is needed, so no secret is exposed in the front-end code. Without login, GitHub allows **60 requests per hour** per visitor.
+I first planned to list my repositories, but most of my repositories are in the course organization, so only two appeared in my account. A profile card was a better fit: it shows meaningful live data without depending on how many public repositories I have.
+ 
 #### HTML – three states
-
+ 
+The card uses the same structure as my quote section from Assignment 2:
+ 
 ```html
-<div id="quote-status" aria-live="polite">
-    <div class="quote-loading" id="quote-loading" hidden> spinner + "Loading a quote…" </div>
-    <figure class="quote-content" id="quote-content" hidden> blockquote + figcaption </figure>
-    <div class="quote-error" id="quote-error" role="alert" hidden> message </div>
+<div aria-live="polite">
+    <div class="github-loading" id="github-loading" hidden> spinner + "Loading GitHub profile…" </div>
+    <div class="github-profile" id="github-profile" hidden> avatar + name + bio + info pills + profile link </div>
+    <div class="github-error" id="github-error" role="alert" hidden> message </div>
 </div>
-<button type="button" class="btn btn-primary" id="new-quote-btn">New quote</button>
+<button type="button" class="btn btn-secondary" id="github-retry-btn" hidden>Try again</button>
 ```
-
-Only one state is visible at a time. The quote uses a `<blockquote>` and the author a `<figcaption>`.
-
+ 
+`showGitHubState(state)` shows exactly one of the three boxes, and shows the **Try again** button only in the error state.
+ 
 #### API Data Handling
-
+ 
 ```
-loadQuote()
-  ├─ showState("loading")          spinner on, button disabled
-  ├─ start 8-second timeout        AbortController
+loadGitHubProfile()
+  ├─ showGitHubState("loading")
+  ├─ start timeout                  AbortController + REQUEST_TIMEOUT_MS (8 s, shared with the quote)
   ├─ try
-  │   ├─ fetch(QUOTE_API_URL)      (up to 2 tries if the same quote id comes back)
-  │   ├─ if !response.ok → throw   HTTP errors like 404 / 500
+  │   ├─ fetch(GITHUB_API_URL)
+  │   ├─ if !response.ok → throw    "HTTP 404", "HTTP 403", …
   │   ├─ response.json()
-  │   ├─ check quote and author are strings, else throw
-  │   ├─ textContent = quote / author
-  │   └─ showState("success") + replay fade-in
+  │   ├─ check login is a string, else throw
+  │   ├─ fill name, bio, avatar, link with textContent / src / href
+  │   ├─ build the info pills with createElement
+  │   └─ showGitHubState("success")
   ├─ catch
   │   ├─ console.error(...)
-  │   ├─ getFriendlyErrorMessage(error)
-  │   └─ showState("error")        button text becomes "Try again"
+  │   ├─ getGitHubErrorMessage(error)
+  │   └─ showGitHubState("error")
   └─ finally: clearTimeout(...)
 ```
-
-The main concepts involved are:
-
-- **`fetch()` with `async` / `await`:** sends the HTTP request and waits for the reply without freezing the page.
-- **`response.ok`:** `fetch()` only fails by itself when there is no network. A 404 or 500 response still "succeeds", so the code checks `response.ok` and throws an `Error` manually.
-- **`response.json()`:** converts the reply into a JavaScript object with `data.quote` and `data.author`.
-- **Response validation:** `typeof data.quote !== "string"` catches an unexpected response format.
-- **No repeats:** `lastQuoteId` stores the id of the quote on screen; if the API returns the same id, it tries once more.
-- **Security:** the quote is inserted with `textContent`, not `innerHTML`, so text from the API cannot inject HTML into the page.
-- **Quotation marks and "— "** are added with CSS `::before` / `::after`, not JavaScript.
-
-#### Loading State
-
-`showState("loading")` shows the spinner and "Loading a quote…" (`#quote-loading`) and disables the button, so the visitor cannot send many requests at once. This is important because API requests may take time depending on the network connection.
-
-`showState()` sets `hidden` on the three boxes with comparisons such as `quoteLoading.hidden = state !== "loading"`, which gives `true` or `false` directly.
-
-#### Success State
-
-The quote and author are placed in `#quote-text` and `#quote-author`, `#quote-content` is shown, and the fade-in animation is replayed.
-
-#### Error State and Timeout
-
-An `AbortController` cancels the request if it takes more than 8 seconds: `setTimeout(() => controller.abort(), 8000)`. Aborting makes `fetch` fail with an `AbortError`. The `finally` block clears the timer whether the request succeeded or failed.
-
-If anything fails, `getFriendlyErrorMessage()` chooses a message and the button changes to **Try again**:
-
+ 
+- **Missing data:** my profile has no name or bio (`null`), so the code uses fallbacks instead of showing "null":
+```js
+document.getElementById("github-name").textContent = user.name || user.login;
+document.getElementById("github-bio").textContent = user.bio || "No bio yet.";
+```
+  If `public_repos` is 0, the pill says "No public repositories yet". If `created_at` is missing, the "Joined" pill is skipped.
+- **Info pills:** each pill is created with `document.createElement("li")` and `appendChild`, and reuses the `.tech-list` style from the project cards. `replaceChildren()` clears the old pills first, so pressing **Try again** does not duplicate them.
+- **Security:** API text is inserted with `textContent`, not `innerHTML`.
+- **Smaller avatar:** GitHub resizes avatars with a URL parameter. `avatar_url + "&s=176"` requests 176 px (2× the 88 px display size, so it stays sharp), which reduced the image from about 46 KB to about 10 KB.
+#### Error State
+ 
 | Situation | How it is detected | Message |
 |---|---|---|
 | No internet | `navigator.onLine` is `false` | "You seem to be offline. Check your internet connection, then press "Try again"." |
-| Too slow (> 8 s) | `error.name === "AbortError"` | "The quote service took too long to respond. Press "Try again" in a moment." |
-| Server error / bad data | anything else | "The quote service is not available right now. Press "Try again", or check back later." |
-
-Each message tells the visitor **what happened** and **what to do next**, instead of leaving them without feedback.
-
-#### Animations
-
-- **Spinner:** `@keyframes spin` rotates a circle with one colored border.
-- **Fade-in:** `@keyframes fadeIn` (opacity 0 → 1, moves up 8px). To replay it for every new quote, the class is removed, `void element.offsetWidth` forces the browser to apply that change, and then the class is added again.
-- **Button:** hover color change and a small press effect (`transform: scale(0.97)`).
-
-### 4.4 Contact Form
-
-The Contact section contains three input fields: Name, Email, and Message.
-
-- HTML attributes `required` and `type="email"` provide basic validation.
-- The submit event is handled with `addEventListener()`, and `preventDefault()` stops the normal page submission.
-- The JavaScript validation from Assignment 1 checks the name and message after removing spaces with `trim()`, so input made of spaces only is rejected.
-- When the entries are valid, a confirmation message is displayed in `#form-feedback` using `textContent`.
-- An `input` listener clears old feedback when the visitor edits the form.
-
-The form is only a demonstration. It does not connect to a backend, send emails, or store messages.
-
+| Too slow (> 8 s) | `error.name === "AbortError"` | "GitHub took too long to respond. Press "Try again" in a moment." |
+| Profile not found | `HTTP 404` | "This GitHub profile could not be found." |
+| Request limit | `HTTP 403` | "GitHub's request limit was reached (60 per hour). Please try again later." |
+| Anything else | default | "GitHub is not available right now. Press "Try again", or check back later." |
+ 
+#### Reusing Assignment 2 code
+ 
+Instead of writing new loading and error styles, I added the GitHub classes to the existing quote rules (for example `.quote-loading, .github-loading { … }`), and the GitHub code reuses the `spinner` class and the `REQUEST_TIMEOUT_MS` constant. Both API sections look and behave the same, without repeated CSS.
+ 
+### 4.2 Contact Form Validation (Complex Logic)
+ 
+In Assignment 2, the form only checked that the name and message were not empty. In Assignment 3, `checkMessage()` checks several rules **in order**. Each failed rule shows its own message and stops with `return`, so the visitor only sees one clear problem at a time:
+ 
+| Step | Rule | Message |
+|---|---|---|
+| 1 | Name, email, and message are not empty after `trim()` | "Please fill in your name, email and message, not just spaces." |
+| 2 | Name has at least 2 characters | "Name must contain at least 2 characters." |
+| 3 | Email matches the pattern below | "Please enter a valid email address, like name@example.com." |
+| 4 | Message has at least 10 characters | "Your message is a bit short. Please write at least 10 characters." |
+| ✓ | All rules pass | "Thank you, [name]! Your entries are valid." – then `contactForm.reset()` clears the form |
+ 
+```js
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+```
+ 
+- `[^\s@]+` means "one or more characters that are not a space or @", so the pattern requires *text @ text . text*.
+- The pattern is intentionally simple: it catches common mistakes (`raghad@`, `raghad.com`, spaces) without rejecting unusual but valid addresses.
+- The form has the `novalidate` attribute. Without it, the browser's own popups for `required` and `type="email"` would block the submit before my JavaScript runs, and my messages would never appear.
+- The name-length rule (step 2) was my own addition. It is placed after the empty check, so an empty form still gets the clearer "please fill in" message.
+### 4.3 Light / Dark Theme (State Management)
+ 
+The theme is one piece of state, `"light"` or `"dark"`, kept in two places:
+ 
+| Where | Purpose |
+|---|---|
+| `data-theme` attribute on `<html>` | What the page shows now – the CSS reacts to it |
+| `localStorage` key `"theme"` | What is remembered for the next visit |
+ 
+#### Choosing the theme on page load
+ 
+A small script in `<head>` runs **before the page is drawn**:
+ 
+```js
+const savedTheme = localStorage.getItem("theme");
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+document.documentElement.dataset.theme = savedTheme || (prefersDark ? "dark" : "light");
+```
+ 
+1. If a theme was saved, use it.
+2. Otherwise, follow the device setting.
+It is in `<head>` because `script.js` loads at the end of the page. If the theme were applied only there, dark-mode visitors would see a quick white flash first.
+ 
+#### Switching the theme
+ 
+In `script.js`, `applyTheme(theme)` sets `data-theme` and updates the button label (🌙 Dark mode / ☀️ Light mode). On page load it syncs the button with the theme already chosen in `<head>`. Each click flips the value, calls `applyTheme()`, and saves the new value with `localStorage.setItem("theme", newTheme)`.
+ 
+All `localStorage` calls are inside `try/catch`, because some browsers block storage (for example in strict private modes). In that case the theme still switches, it just isn't remembered.
+ 
+#### CSS variables
+ 
+Every color that changes between themes is a CSS variable in `:root`, and the dark theme only overrides the variables:
+ 
+```css
+:root {
+    --accent: #c2185b;
+    --header-bg: #b5475f;
+    ...
+}
+ 
+[data-theme="dark"] {
+    --accent: #f96983;
+    --header-bg: #7a3d4a;
+    --card: #2a2326;
+    --text: #f3eeec;
+    ...
+    color-scheme: dark; /* dark scrollbars and form controls */
+}
+```
+ 
+Because the cards, quote box, GitHub card, and form all use these variables, they switch automatically without separate dark-mode rules. Colors that were hardcoded in Assignment 2 (`header`, `footer`, `button`, `h2`, `#greeting`) were converted to variables. For example, the header, footer, and Send Message button share `--header-bg`.
+ 
+### 4.4 Features Kept from Assignments 1 and 2
+ 
+- **Dynamic greeting:** `showGreeting()` uses `getHours()` to choose good morning / afternoon / evening.
+- **Expandable project cards:** event delegation, `aria-expanded`, `inert` on closed panels, and the `grid-template-rows: 0fr → 1fr` animation. These are unchanged from Assignment 2.
+- **Quote of the Moment:** DummyJSON API with three states, an 8-second timeout, response validation, and no repeated quotes. Unchanged, apart from now sharing its styles with the GitHub card.
+ 
 ## 5. User Experience and Accessibility
-
+ 
 ### Navigation
-
-The navigation bar links to About Me, Projects, Quote, and Contact using section IDs, so visitors can jump directly to each part of the page.
-
-
+ 
+The navigation bar now links to About Me, GitHub, Projects, Quote, and Contact. The theme button sits under the navigation in the header, so it is easy to find on every screen size.
+ 
 ### Accessibility
-
-- All interactive controls are real `<button type="button">` elements, so Tab, Enter, and Space work automatically.
-- `:focus-visible` shows a 3px outline on buttons for keyboard users.
-- `aria-expanded` and `aria-controls` describe the relationship between project buttons and their content.
-- `inert` hides closed card panels from keyboard and screen-reader users.
-- `aria-live="polite"` announces new quotes; `role="alert"` announces errors immediately; the decorative arrow and spinner use `aria-hidden`.
-- `@media (prefers-reduced-motion: reduce)` turns off the card, arrow, hover, spinner, fade-in, and button animations for visitors who prefer less motion.
-- Project images have alternative text, and form labels are linked to their inputs with `for` / `id`.
-
+ 
+- All interactive controls are real `<button>` elements with `:focus-visible` outlines; the theme button has its own white outline on the header.
+- The GitHub card uses `aria-live="polite"` to announce the result and `role="alert"` for errors; the spinner uses `aria-hidden`.
+- The avatar's `alt` text is set from the API data ("GitHub profile picture of Raghad25B").
+- **Color contrast:** Lighthouse showed that white text on the light pink header and the pale pink text failed the WCAG 4.5:1 contrast ratio. I darkened `--accent` (`#f96983` → `#c2185b`) and `--header-bg` (`#eaaeb9` → `#b5475f`) in the light theme and added `--accent-strong` for primary buttons. All text now passes in both themes.
+- `prefers-reduced-motion` still turns off animations, and `color-scheme: dark` makes built-in controls match the dark theme.
 ## 6. Testing
-
+ 
 ### 6.1 Method
-
-- **Manual testing in the browser** using DevTools: the **Console** for errors, the **Network** tab set to *Offline* to test API failures, and a narrow window / device mode for phone width.
-- **Automated checks during development**, run by Claude in headless Chromium at 1100px and 390px widths. The API was replaced by sample responses to simulate success, a server error, invalid data, and being offline.
-
+ 
+- **Manual testing in the browser** with DevTools: the **Console** for errors, the **Network** tab set to *Offline* or *Slow 3G* to test API failures, **Application → Local Storage** to check and delete the saved theme, **Rendering → prefers-color-scheme** to emulate a dark device, and **device mode** for phone, tablet, and desktop sizes.
+- **Google Lighthouse** (Mobile, Incognito window, served with VS Code Live Server), before and after the optimizations, in both themes.
 ### 6.2 Test Cases
-
+ 
 | # | Test Case | Expected Result | Actual Result |
 |---|---|---|---|
-| 1 | Open the website | All sections appear; cards closed; a quote loads | Pass |
-| 2 | Dynamic greeting | Greeting matches the visitor's local time | Pass |
-| 3 | Show project details | Selected card expands, arrow flips, label "Hide details" | Pass |
-| 4 | Hide project details | Selected card collapses | Pass |
-| 5 | Open both cards one by one | Header button changes to "Collapse all" | Pass |
-| 6 | Collapse all / Expand all | Both cards close / open, label updates | Pass |
-| 7 | Keyboard: Tab to a card button + Enter | Card toggles | Pass |
-| 8 | Keyboard: Tab while a card is closed | Hidden content is skipped (`inert`) | Pass |
-| 9 | New quote button | Spinner, then a different quote with fade-in | Pass |
-| 10 | API server error (500) | Error box, button "Try again" | Pass |
-| 11 | API invalid response | "Service not available" message | Pass |
-| 12 | Offline (DevTools → Network → Offline) | "You seem to be offline…" message | Pass |
-| 13 | Back online + Try again | Quote loads, button "New quote" | Pass |
-| 14 | Empty contact form | Browser asks to fill the required field | Pass |
-| 15 | Whitespace-only name or message | "Please enter a name and message, not just spaces." | Pass |
-| 16 | Valid contact form | "Thank you, [name]! Your entries are valid." | Pass |
-| 17 | Mobile screen (390px) | One column, readable, no horizontal scrolling | Pass |
-| 18 | Console | No JavaScript errors (only the logged quote error in tests 10–12) | Pass |
-
-Tested in: Microsoft Edge on Windows
-
-
+| 1 | Open the website | All sections appear; GitHub card and a quote load | Pass |
+| 2 | GitHub card – normal load | Avatar, "Raghad25B", "No bio yet.", repository and join-date pills | Pass |
+| 3 | GitHub card – slow network (Slow 3G) | Spinner and "Loading GitHub profile…" appear first | Pass |
+| 4 | GitHub card – wrong username | "This GitHub profile could not be found." + Try again | Pass |
+| 5 | GitHub card – offline | "You seem to be offline…" + Try again | Pass |
+| 6 | Back online + Try again | Profile loads, Try again button disappears | Pass |
+| 7 | Contact – empty form / spaces only | "Please fill in your name, email and message…" | Pass |
+| 8 | Contact – name "R" | "Name must contain at least 2 characters." | Pass |
+| 9 | Contact – email "raghad@" / "raghad.com" | "Please enter a valid email address…" | Pass |
+| 10 | Contact – message "hi" | "Your message is a bit short…" | Pass |
+| 11 | Contact – all valid | Thank-you message, form clears | Pass |
+| 12 | Theme toggle | Whole site switches; label changes | Pass |
+| 13 | Refresh / reopen the tab | Chosen theme is remembered | Pass |
+| 14 | No saved theme + dark device setting | Site starts in dark mode | Pass |
+| 15 | Dark mode – all sections | All text readable (no dark-on-dark) | Pass |
+| 16 | Project cards and quote (regression) | Work as in Assignment 2 | Pass |
+| 17 | Phone, tablet, desktop sizes | No horizontal scrolling; cards and GitHub card stack on phone | Pass |
+| 18 | Links | Navigation, GitHub profile, and DummyJSON links work | Pass |
+| 19 | Console | No JavaScript errors (only the logged API errors in tests 4–5) | Pass |
+ 
+Tested in: Google Chrome on Windows
+ 
 ## 7. Performance and Compatibility
-
-- Only two local code files (one CSS, one JS) and two images (under 600 KB in total); no frameworks, fonts, or libraries.
-- Only `transform`, `opacity`, and grid rows are animated, which are cheap for the browser to draw.
-- One click listener handles all project cards (event delegation) instead of one per card.
-- The API is called once on page load and then only when the visitor asks; the button is disabled during a request.
-- The card grid uses `auto-fit` + `minmax(300px, 1fr)`; the navigation and quote buttons use `flex-wrap`; `main` is 90% wide with a 1000px maximum.
-- All features use standard HTML, CSS, and JavaScript supported by current versions of Chrome, Edge, Firefox, and Safari. The grid row animation and `inert` need browsers from 2023 or later.
-
+ 
+### 7.1 Lighthouse Results (Mobile)
+ 
+| | Performance | Accessibility | Best Practices | SEO | Largest Contentful Paint |
+|---|---|---|---|---|---|
+| Before | 87 | 96 | 96 | 91 | 4.1 s |
+| After – dark theme | **100** | **100** | **100** | **100** | 1.9 s |
+| After – light theme | **100** | **100** | **100** | **100** | 1.1 s |
+ 
+### 7.2 Changes Made
+ 
+| Lighthouse finding | What I changed |
+|---|---|
+| Images much larger than displayed (1200×1600 shown at 315×420), ≈555 KB in total | Resized to 840 px tall (2× display size) and converted to **WebP** with Squoosh: `Wasm` 321 KB → 55 KB; both images ≈555 KB → ≈106 KB |
+| Images below the first screen loaded immediately | Added `loading="lazy"` |
+| Possible layout shift while images load | Added `width` and `height` attributes |
+| GitHub avatar 460×460 for an 88 px circle | Requested a 176 px version with `&s=176` |
+| Low contrast in buttons, header, and pink text | New theme colors (section 5) |
+| Console error: `favicon.ico` 404 | Added an inline SVG favicon |
+| No meta description | Added `<meta name="description">` |
+ 
+### 7.3 Reviewed but Not Changed
+ 
+| Finding | Reason |
+|---|---|
+| Minify CSS / JS (4–5 KB) | Very small saving; readable code is more important for this course |
+| Cache lifetimes, HSTS, CSP, COOP, X-Frame-Options | These are **server (HTTP header) settings** controlled by the host, not by my HTML, CSS, or JavaScript |
+| Network dependency chain | Expected for client-side API calls: the page content shows first, then the API sections fill in |
+ 
+### 7.4 Compatibility
+ 
+- Only standard HTML, CSS, and JavaScript supported by current versions of Chrome, Edge, Firefox, and Safari. WebP, `loading="lazy"`, `localStorage`, and `prefers-color-scheme` are supported in all of them.
+- The layout uses `auto-fit` + `minmax()` grids and `flex-wrap`, so it adapts to phones, tablets, and desktops.
 ## 8. Limitations
-
+ 
 - The contact form is a demonstration and does not send messages.
-- The Quote of the Moment feature needs an internet connection and depends on DummyJSON being available.
-- Only two projects are currently displayed. Project content is written in the HTML, so adding a project means copying an `<article>` block and giving it a new unique `details-N` ID.
-
-
+- The GitHub card and quote section need an internet connection and depend on GitHub and DummyJSON being available. GitHub allows 60 unauthenticated requests per hour per visitor.
+- The GitHub card shows profile information only, not a list of repositories, because most of my repositories are in the course organization.
 ## 9. Conclusion
-
-Assignment 2 improves my original portfolio by adding interactive project cards and external API data handling.
-
-The project demonstrates how JavaScript can respond to user actions, update page content, and communicate loading and error states. It also gave me practice with DOM manipulation, event delegation, asynchronous requests with error handling, CSS transitions and animations, and accessibility.
-
-These features make the portfolio more interactive while keeping the implementation organized and understandable.
-
+ 
+Assignment 3 turns my portfolio into a more complete web application. It now combines two external APIs with careful error and missing-data handling, a step-by-step validation process, and a theme that is stored and restored with `localStorage`.
+ 
+Optimizing with Lighthouse showed me how much image size and color contrast affect a site: converting two images to WebP improved the Performance score from 87 to 100, and reorganizing the colors into theme variables fixed contrast and dark mode at the same time. Reusing my Assignment 2 code and styles kept the new features consistent and avoided repetition.
+ 
 ## 10. References
-
+ 
 - Course slides: Ch.2 HTML, Ch.3 CSS, Ch.4 JS
-- MDN Web Docs – Fetch API, AbortController, `inert`, ARIA
+- MDN Web Docs – Fetch API, AbortController, Window.localStorage, prefers-color-scheme, Lazy loading
+- GitHub REST API – Users: https://docs.github.com/en/rest/users/users
+- GitHub REST API – Rate limits: https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api
 - DummyJSON Quotes API – https://dummyjson.com/docs/quotes
-- Claude (Claude Opus 5.5): Artifacts used for the two features and modified (`project-cards.html`, `quote-widget.html`)
+- Google Lighthouse (Chrome DevTools), Squoosh (https://squoosh.app)
+- Claude (Claude Opus 5.5) and ChatGPT (GPT-6): suggestions for the GitHub card, form validation, theme toggle, and Lighthouse fixes, reviewed and modified (see `ai-usage-report.md`)
+ 
