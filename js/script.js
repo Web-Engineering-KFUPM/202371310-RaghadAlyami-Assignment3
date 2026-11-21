@@ -312,3 +312,27 @@ githubRetryBtn.addEventListener("click", loadGitHubProfile);
 
 // Load the profile when the page opens
 loadGitHubProfile();
+
+// ----- Light / dark theme (remembered with localStorage) -----
+
+const themeToggle = document.getElementById("theme-toggle");
+
+// Updates the page and the button label to match the given theme
+function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme; // the CSS reacts to data-theme
+    themeToggle.textContent = theme === "dark" ? "☀️ Light mode" : "🌙 Dark mode";
+}
+
+// The small script in <head> already chose the starting theme; sync the button to it
+applyTheme(document.documentElement.dataset.theme || "light");
+
+themeToggle.addEventListener("click", () => {
+    const newTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(newTheme);
+
+    try {
+        localStorage.setItem("theme", newTheme); // remember the choice for next visit
+    } catch (e) {
+        // Storage blocked: the theme still switches, it just won't be remembered
+    }
+});

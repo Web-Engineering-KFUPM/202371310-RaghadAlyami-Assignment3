@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raghad Alyami | Portfolio</title>
     <link rel="stylesheet" href="css/styles.css">
+
+    <script>
+    // Apply the theme before the page is drawn, so it never flashes light first.
+    // Saved choice wins; otherwise follow the device's light/dark setting.
+    try {
+        const savedTheme = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.theme = savedTheme || (prefersDark ? "dark" : "light");
+    } catch (e) {
+        // localStorage can be blocked (e.g. strict privacy mode): the site stays light
+    }
+</script>
 </head>
 
 <body>
@@ -19,6 +31,7 @@
             <a href="#quote">Quote</a>
             <a href="#contact">Contact</a>
         </nav>
+        <button type="button" class="theme-toggle" id="theme-toggle">🌙 Dark mode</button>
     </header>
 
     <main>
