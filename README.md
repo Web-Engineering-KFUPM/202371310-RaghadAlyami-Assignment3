@@ -97,7 +97,7 @@ Uses only standard features supported by current versions of Chrome, Edge, Firef
  
 ## AI Use (summary)
  
-I used Claude (Claude Opus 5.5) and ChatGPT (GPT-6) to plan the assignment, explain the GitHub API and `localStorage`, suggest and review code for the new features, interpret my Lighthouse reports, and draft documentation.
+I used ChatGPT (GPT-6) to plan the assignment, get fill-in-the-blank code templates for the new features, review my code, interpret my Lighthouse reports, and draft documentation. I used Claude (Claude Opus 5.5) to organize my AI evidence and draft the AI usage report. I completed and adapted the code myself and tested everything in the browser.
 I adapted the code to my existing style, added my own changes, and tested everything in the browser.
 All AI use, the Usage Log, and my declaration are in the **[AI usage report](docs/ai-usage-report.md)**.
  
